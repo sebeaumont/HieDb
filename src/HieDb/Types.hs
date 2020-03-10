@@ -30,7 +30,6 @@ newtype HieDb = HieDb { getConn :: Connection }
 setHieTrace :: HieDb -> Maybe (T.Text -> IO ()) -> IO ()
 setHieTrace (HieDb conn) = setTrace conn
 
--- XXX orpham intances need sorting out --
 
 instance ToField ModuleName where
   toField mod = SQLText $ T.pack $ moduleNameString mod
