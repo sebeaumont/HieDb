@@ -1,9 +1,7 @@
-{-# LANGUAGE FlexibleContexts #-}
 {-# LANGUAGE TupleSections #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
+
 module HieDb.Utils where
 
 import Prelude hiding (mod)
@@ -123,7 +121,7 @@ genRefRow :: FilePath -> HieFile -> [RefRow]
 genRefRow path hf = genRows $ generateRefs $ getAsts $ hie_asts hf
   where
     genRows = mapMaybe go
-    go ((Right name, sp))
+    go (Right name, sp)
       | Just mod <- nameModule_maybe name = Just $
           RefRow path smod sunit occ (moduleName mod) (moduleUnitId mod) file sl sc el ec
           where

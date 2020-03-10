@@ -1,9 +1,6 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BlockArguments #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
 {-# LANGUAGE ViewPatterns #-}
 module HieDb.Query where
 
@@ -55,7 +52,8 @@ lookupHieFile (getConn -> conn) mn uid = do
             ++ show (moduleNameString mn, uid) ++ ". Entries: "
             ++ intercalate ", " (map hieModuleHieFile xs)
 
-findDef :: HieDb -> OccName -> ModuleName -> Maybe UnitId -> IO (Either HieDbErr (RealSrcSpan,Module))
+findDef :: HieDb -> OccName -> ModuleName -> Maybe UnitId
+        -> IO (Either HieDbErr (RealSrcSpan,Module))
 findDef conn occ mn muid = do
   euid <- maybe (resolveUnitId conn mn) (return . Right) muid
   case euid of
@@ -72,7 +70,7 @@ findDef conn occ mn muid = do
                      (occ,mn,uid)
           maybe (Left $ NameNotFound occ mdl) Right
             <$> tryAll (findDefInFile occ mdl) (map fromOnly files)
-        Just modrow -> do
+        Just modrow ->
           findDefInFile occ mdl $ hieModuleHieFile modrow
 
 withTarget

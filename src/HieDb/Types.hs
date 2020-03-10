@@ -1,10 +1,9 @@
 {-# LANGUAGE FlexibleContexts #-}
-{-# LANGUAGE TupleSections #-}
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE BlockArguments #-}
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE StandaloneDeriving #-}
-{-# LANGUAGE StandaloneDeriving #-}
+
 module HieDb.Types where
 
 import Prelude hiding (mod)
@@ -28,16 +27,21 @@ import Database.SQLite.Simple.FromField
 
 newtype HieDb = HieDb { getConn :: Connection }
 
-setHieTrace :: HieDb -> (Maybe (T.Text -> IO ())) -> IO ()
-setHieTrace (HieDb conn) x = setTrace conn x
+setHieTrace :: HieDb -> Maybe (T.Text -> IO ()) -> IO ()
+setHieTrace (HieDb conn) = setTrace conn
+
+-- XXX orpham intances need sorting out --
 
 instance ToField ModuleName where
   toField mod = SQLText $ T.pack $ moduleNameString mod
+  
 instance FromField ModuleName where
   fromField fld = mkModuleName . T.unpack <$> fromField fld
 
+
 instance ToField UnitId where
   toField uid = SQLText $ T.pack $ unitIdString uid
+  
 instance FromField UnitId where
   fromField fld = stringToUnitId . T.unpack <$> fromField fld
 
@@ -56,8 +60,10 @@ fromNsChar 't' = Just tcClsName
 fromNsChar 'z' = Just tvName
 fromNsChar _ = Nothing
 
+
 instance ToField OccName where
   toField occ = SQLText $ T.pack $ toNsChar (occNameSpace occ) : occNameString occ
+  
 instance FromField OccName where
   fromField fld =
     case fieldData fld of
@@ -76,6 +82,7 @@ data HieModuleRow
   , hieUnit :: UnitId
   , hieModuleIndexTime :: UTCTime
   }
+
 
 instance ToRow HieModuleRow where
   toRow (HieModuleRow a b c d) =
